@@ -3,7 +3,7 @@ import { ResultSetHeader } from 'mysql2';
 import { validationResult } from 'express-validator';
 import pool from '../config/database';
 import { AuthRequest, SolicitudRow } from '../types';
-import { sendNewSolicitudNotification } from '../services/email.service';
+import { sendNewSolicitudNotification, sendStatusChangeNotification } from '../services/email.service';
 
 /**
  * GET /api/solicitudes
@@ -201,7 +201,7 @@ export async function createSolicitud(
     );
 
     // Send email notification (non-blocking)
-    sendNewSolicitudNotification({ nombre, email, telefono, tipoCaso, mensaje }).catch(
+    sendNewSolicitudNotification({ id: result.insertId, nombre, email, telefono, tipoCaso, mensaje }).catch(
       (err) => console.error('[solicitudes.create] Email notification failed:', err),
     );
 
@@ -301,6 +301,15 @@ export async function updateSolicitud(
          VALUES (?, ?, ?, ?, ?)`,
         [id, current.estado, estado, req.user.id, comentario || null],
       );
+
+      // Notify firm + client about status change (non-blocking)
+      sendStatusChangeNotification({
+        id,
+        nombre: current.nombre,
+        email: current.email,
+        estadoAnterior: current.estado,
+        estadoNuevo: estado,
+      }).catch((err) => console.error('[solicitudes.update] Status change email failed:', err));
     }
 
     // Audit log
