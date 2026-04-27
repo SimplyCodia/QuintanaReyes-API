@@ -25,10 +25,12 @@
     "express-rate-limit": "^8.4.1",
     "express-validator": "^7.3.2",
     "helmet": "^8.1.0",
+    "isomorphic-dompurify": "^3.10.0",
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.10.1",
     "mysql2": "^3.22.2",
-    "nodemailer": "^8.0.6"
+    "nodemailer": "^8.0.6",
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
