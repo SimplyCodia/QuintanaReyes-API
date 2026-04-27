@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const pool = mysql.createPool({
+const base = mysql.createPool({
   host: process.env.DB_HOST,
   port: parseInt(process.env.DB_PORT || '3306', 10),
   database: process.env.DB_NAME,
@@ -16,4 +16,10 @@ const pool = mysql.createPool({
   timezone: '+00:00',
 });
 
-export default pool;
+// Force every session to UTC so CURRENT_TIMESTAMP === UTC_TIMESTAMP().
+const rawPool = base.pool;
+rawPool.on('connection', (connection) => {
+  connection.query("SET time_zone = '+00:00'");
+});
+
+export default base;

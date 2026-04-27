@@ -12,6 +12,8 @@ import usersRoutes from './routes/users.routes';
 import dashboardRoutes from './routes/dashboard.routes';
 import auditRoutes from './routes/audit.routes';
 import blogRoutes from './routes/blog.routes';
+import clientesRoutes from './routes/clientes.routes';
+import notificacionesRoutes from './routes/notificaciones.routes';
 
 const app = express();
 
@@ -59,6 +61,8 @@ app.use('/api/users', usersRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/audit', auditRoutes);
 app.use('/api/blog', blogRoutes);
+app.use('/api/clientes', clientesRoutes);
+app.use('/api/notificaciones', notificacionesRoutes);
 
 // ── 404 handler ───────────────────────────────────────────────────
 app.use((_req: Request, res: Response) => {

@@ -39,6 +39,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/morgan": "^1.9.10",
     "@types/nodemailer": "^8.0.0",
+    "@types/sharp": "^0.31.1",
     "@types/supertest": "^7.2.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",

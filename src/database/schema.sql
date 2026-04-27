@@ -18,6 +18,21 @@ CREATE TABLE IF NOT EXISTS users (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
+CREATE TABLE IF NOT EXISTS clientes (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(200) NOT NULL,
+  telefono VARCHAR(30) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  notas TEXT NULL,
+  fechaCreacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  fechaActualizacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  INDEX idx_clientes_email (email),
+  INDEX idx_clientes_nombre (nombre),
+  INDEX idx_clientes_telefono (telefono)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
 CREATE TABLE IF NOT EXISTS solicitudes (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nombre VARCHAR(200) NOT NULL,
@@ -28,6 +43,7 @@ CREATE TABLE IF NOT EXISTS solicitudes (
   estado ENUM('PENDIENTE','EN_PROCESO','ATENDIDA','ARCHIVADA') NOT NULL DEFAULT 'PENDIENTE',
   notasInternas TEXT NULL,
   asignadoAId INT NULL,
+  clienteId INT NULL,
   origen VARCHAR(100) NULL DEFAULT 'web',
   fechaCreacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   fechaActualizacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -37,9 +53,14 @@ CREATE TABLE IF NOT EXISTS solicitudes (
   INDEX idx_solicitudes_email (email),
   INDEX idx_solicitudes_fechaCreacion (fechaCreacion),
   INDEX idx_solicitudes_asignadoAId (asignadoAId),
+  INDEX idx_solicitudes_clienteId (clienteId),
 
   CONSTRAINT fk_solicitudes_asignadoA
     FOREIGN KEY (asignadoAId) REFERENCES users(id)
+    ON DELETE SET NULL ON UPDATE CASCADE,
+
+  CONSTRAINT fk_solicitudes_cliente
+    FOREIGN KEY (clienteId) REFERENCES clientes(id)
     ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -117,6 +138,52 @@ CREATE TABLE IF NOT EXISTS blog_posts (
   CONSTRAINT fk_blog_creadoPor
     FOREIGN KEY (creadoPorId) REFERENCES users(id)
     ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+CREATE TABLE IF NOT EXISTS comentarios_solicitud (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  solicitudId INT NOT NULL,
+  usuarioId INT NOT NULL,
+  contenido TEXT NOT NULL,
+  parentId INT NULL,
+  fechaCreacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+  INDEX idx_comentarios_solicitudId (solicitudId),
+  INDEX idx_comentarios_parentId (parentId),
+  INDEX idx_comentarios_usuarioId (usuarioId),
+  INDEX idx_comentarios_fecha (fechaCreacion),
+
+  CONSTRAINT fk_comentarios_solicitud
+    FOREIGN KEY (solicitudId) REFERENCES solicitudes(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_comentarios_usuario
+    FOREIGN KEY (usuarioId) REFERENCES users(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_comentarios_parent
+    FOREIGN KEY (parentId) REFERENCES comentarios_solicitud(id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+CREATE TABLE IF NOT EXISTS notificaciones (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  usuarioId INT NOT NULL,
+  tipo VARCHAR(50) NOT NULL,
+  titulo VARCHAR(300) NOT NULL,
+  mensaje TEXT NULL,
+  entidad VARCHAR(100) NULL,
+  entidadId INT NULL,
+  leida TINYINT(1) NOT NULL DEFAULT 0,
+  fechaCreacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+  INDEX idx_notif_usuario (usuarioId),
+  INDEX idx_notif_leida (leida),
+  INDEX idx_notif_fecha (fechaCreacion),
+
+  CONSTRAINT fk_notif_usuario
+    FOREIGN KEY (usuarioId) REFERENCES users(id)
+    ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 

@@ -263,6 +263,142 @@ export const updateBlogPostValidation = [
     .withMessage('Fecha de publicacion invalida (ISO 8601).'),
 ];
 
+// ── Create Cliente (admin panel) ──────────────────────────────────
+export const createClienteValidation = [
+  body('nombre')
+    .trim()
+    .notEmpty()
+    .withMessage('El nombre es obligatorio.')
+    .isLength({ max: 200 })
+    .withMessage('El nombre no puede exceder 200 caracteres.')
+    .escape(),
+  body('telefono')
+    .trim()
+    .notEmpty()
+    .withMessage('El teléfono es obligatorio.')
+    .isLength({ max: 30 })
+    .withMessage('El teléfono no puede exceder 30 caracteres.')
+    .matches(/^[0-9+\-() ]+$/)
+    .withMessage('Formato de teléfono inválido.'),
+  body('email')
+    .trim()
+    .notEmpty()
+    .withMessage('El correo es obligatorio.')
+    .isEmail()
+    .withMessage('Debe proporcionar un email válido.')
+    .normalizeEmail()
+    .isLength({ max: 255 })
+    .withMessage('El email no puede exceder 255 caracteres.'),
+  body('notas')
+    .optional({ values: 'falsy' })
+    .isLength({ max: 5000 })
+    .withMessage('Las notas no pueden exceder 5000 caracteres.')
+    .trim(),
+];
+
+// ── Update Cliente (admin panel) ──────────────────────────────────
+export const updateClienteValidation = [
+  body('nombre')
+    .optional()
+    .trim()
+    .isLength({ max: 200 })
+    .withMessage('El nombre no puede exceder 200 caracteres.')
+    .escape(),
+  body('telefono')
+    .optional()
+    .trim()
+    .isLength({ max: 30 })
+    .withMessage('El teléfono no puede exceder 30 caracteres.')
+    .matches(/^[0-9+\-() ]+$/)
+    .withMessage('Formato de teléfono inválido.'),
+  body('email')
+    .optional()
+    .trim()
+    .isEmail()
+    .withMessage('Debe proporcionar un email válido.')
+    .normalizeEmail()
+    .isLength({ max: 255 })
+    .withMessage('El email no puede exceder 255 caracteres.'),
+  body('notas')
+    .optional({ values: 'null' })
+    .isLength({ max: 5000 })
+    .withMessage('Las notas no pueden exceder 5000 caracteres.')
+    .trim(),
+];
+
+// ── Create Solicitud Admin (admin panel) ──────────────────────────
+export const createSolicitudAdminValidation = [
+  body('nombre')
+    .trim()
+    .notEmpty()
+    .withMessage('El nombre es obligatorio.')
+    .isLength({ max: 200 })
+    .withMessage('El nombre no puede exceder 200 caracteres.')
+    .escape(),
+  body('telefono')
+    .trim()
+    .notEmpty()
+    .withMessage('El teléfono es obligatorio.')
+    .isLength({ max: 30 })
+    .withMessage('El teléfono no puede exceder 30 caracteres.')
+    .matches(/^[0-9+\-() ]+$/)
+    .withMessage('Formato de teléfono inválido.'),
+  body('email')
+    .trim()
+    .notEmpty()
+    .withMessage('El correo es obligatorio.')
+    .isEmail()
+    .withMessage('Debe proporcionar un email válido.')
+    .normalizeEmail()
+    .isLength({ max: 255 })
+    .withMessage('El email no puede exceder 255 caracteres.'),
+  body('tipoCaso')
+    .trim()
+    .notEmpty()
+    .withMessage('El tipo de caso es requerido.')
+    .isIn([
+      'FAMILIA',
+      'ADMINISTRATIVO',
+      'CORPORATIVO',
+      'CIVIL',
+      'PENAL',
+      'LABORAL',
+      'MIGRATORIO',
+    ])
+    .withMessage('Tipo de caso inválido.'),
+  body('mensaje')
+    .optional({ values: 'falsy' })
+    .isLength({ max: 5000 })
+    .withMessage('El mensaje no puede exceder 5000 caracteres.')
+    .trim(),
+  body('origen')
+    .trim()
+    .notEmpty()
+    .withMessage('El origen es requerido.')
+    .isIn(['web', 'whatsapp', 'tiktok', 'instagram', 'referido'])
+    .withMessage('Origen inválido.'),
+  body('clienteId')
+    .optional({ values: 'null' })
+    .isInt({ min: 1 })
+    .withMessage('El ID del cliente debe ser un entero positivo.')
+    .toInt(),
+];
+
+// ── Create Comentario (solicitud comment) ────────────────────────
+export const createComentarioValidation = [
+  body('contenido')
+    .trim()
+    .notEmpty()
+    .withMessage('El comentario es obligatorio.')
+    .isLength({ max: 5000 })
+    .withMessage('El comentario no puede exceder 5000 caracteres.'),
+  body('parentId')
+    .optional({ values: 'null' })
+    .isInt({ min: 1 })
+    .withMessage('El ID del comentario padre debe ser un entero positivo.')
+    .toInt(),
+];
+
 // ── Update User (admin panel) ─────────────────────────────────────
 export const updateUserValidation = [
   body('nombre')

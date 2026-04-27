@@ -51,10 +51,24 @@ export interface SolicitudRow extends RowDataPacket {
   estado: EstadoSolicitud;
   notasInternas: string | null;
   asignadoAId: number | null;
+  clienteId: number | null;
   origen: string | null;
   fechaCreacion: Date;
   fechaActualizacion: Date;
 }
+
+// ── Cliente ──────────────────────────────────────────────────────
+export interface ClienteRow extends RowDataPacket {
+  id: number;
+  nombre: string;
+  telefono: string;
+  email: string;
+  notas: string | null;
+  fechaCreacion: Date;
+  fechaActualizacion: Date;
+}
+
+export const VALID_ORIGENES = ['web', 'whatsapp', 'tiktok', 'instagram', 'referido'] as const;
 
 // ── Historial Estado ──────────────────────────────────────────────
 export interface HistorialEstadoRow extends RowDataPacket {
@@ -103,6 +117,30 @@ export interface BlogPostRow extends RowDataPacket {
   fechaCreacion: Date;
   fechaActualizacion: Date;
   creadoPorId: number | null;
+}
+
+// ── Comentario Solicitud ─────────────────────────────────────────
+export interface ComentarioRow extends RowDataPacket {
+  id: number;
+  solicitudId: number;
+  usuarioId: number;
+  contenido: string;
+  parentId: number | null;
+  fechaCreacion: Date;
+  usuarioNombre?: string;
+}
+
+// ── Notificacion ─────────────────────────────────────────────────
+export interface NotificacionRow extends RowDataPacket {
+  id: number;
+  usuarioId: number;
+  tipo: string;
+  titulo: string;
+  mensaje: string | null;
+  entidad: string | null;
+  entidadId: number | null;
+  leida: boolean;
+  fechaCreacion: Date;
 }
 
 // ── API Response ──────────────────────────────────────────────────

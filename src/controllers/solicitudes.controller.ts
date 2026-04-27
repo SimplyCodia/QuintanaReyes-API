@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { ResultSetHeader } from 'mysql2';
 import { validationResult } from 'express-validator';
 import pool from '../config/database';
-import { AuthRequest, SolicitudRow } from '../types';
+import { AuthRequest, SolicitudRow, ClienteRow } from '../types';
 import { sendNewSolicitudNotification, sendStatusChangeNotification } from '../services/email.service';
 
 /**
@@ -59,6 +59,15 @@ export async function getSolicitudes(
       }
     }
 
+    // Filter by clienteId
+    if (req.query.clienteId) {
+      const clienteId = parseInt(req.query.clienteId as string);
+      if (!isNaN(clienteId) && clienteId > 0) {
+        conditions.push('s.clienteId = ?');
+        params.push(clienteId);
+      }
+    }
+
     // Search by nombre, email, or telefono
     if (req.query.search) {
       const search = `%${req.query.search}%`;
@@ -80,9 +89,10 @@ export async function getSolicitudes(
     // Fetch page
     params.push(limit, offset);
     const [rows] = await pool.query<SolicitudRow[]>(
-      `SELECT s.*, u.nombre as asignadoNombre
+      `SELECT s.*, u.nombre as asignadoNombre, c.nombre as clienteNombre
        FROM solicitudes s
        LEFT JOIN users u ON s.asignadoAId = u.id
+       LEFT JOIN clientes c ON s.clienteId = c.id
        ${whereClause}
        ORDER BY s.fechaCreacion DESC
        LIMIT ? OFFSET ?`,
@@ -124,9 +134,10 @@ export async function getSolicitudById(
     }
 
     const [rows] = await pool.query<SolicitudRow[]>(
-      `SELECT s.*, u.nombre as asignadoNombre
+      `SELECT s.*, u.nombre as asignadoNombre, c.nombre as clienteNombre
        FROM solicitudes s
        LEFT JOIN users u ON s.asignadoAId = u.id
+       LEFT JOIN clientes c ON s.clienteId = c.id
        WHERE s.id = ? LIMIT 1`,
       [id],
     );
@@ -327,9 +338,10 @@ export async function updateSolicitud(
 
     // Return the updated record
     const [updated] = await pool.query<SolicitudRow[]>(
-      `SELECT s.*, u.nombre as asignadoNombre
+      `SELECT s.*, u.nombre as asignadoNombre, c.nombre as clienteNombre
        FROM solicitudes s
        LEFT JOIN users u ON s.asignadoAId = u.id
+       LEFT JOIN clientes c ON s.clienteId = c.id
        WHERE s.id = ? LIMIT 1`,
       [id],
     );
@@ -340,6 +352,86 @@ export async function updateSolicitud(
     });
   } catch (error) {
     console.error('[solicitudes.update] Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor.',
+    });
+  }
+}
+
+/**
+ * POST /api/solicitudes/admin
+ * Protected. Creates a solicitud from admin panel (no email notification).
+ */
+export async function createSolicitudAdmin(
+  req: AuthRequest,
+  res: Response,
+): Promise<void> {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ success: false, message: errors.array()[0].msg });
+    return;
+  }
+
+  if (!req.user) {
+    res.status(401).json({ success: false, message: 'No autenticado.' });
+    return;
+  }
+
+  const { nombre, telefono, email, tipoCaso, mensaje, origen, clienteId } = req.body;
+
+  try {
+    // Verify client exists if clienteId is provided
+    if (clienteId) {
+      const [clienteRows] = await pool.query<ClienteRow[]>(
+        'SELECT id FROM clientes WHERE id = ? LIMIT 1',
+        [clienteId],
+      );
+
+      if (clienteRows.length === 0) {
+        res.status(404).json({
+          success: false,
+          message: 'Cliente no encontrado.',
+        });
+        return;
+      }
+    }
+
+    const [result] = await pool.query<ResultSetHeader>(
+      `INSERT INTO solicitudes (nombre, telefono, email, tipoCaso, mensaje, origen, clienteId)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [nombre, telefono, email, tipoCaso, mensaje || '', origen, clienteId || null],
+    );
+
+    // Audit log
+    await pool.query<ResultSetHeader>(
+      `INSERT INTO audit_logs (usuarioId, accion, entidad, entidadId, metadata)
+       VALUES (?, ?, ?, ?, ?)`,
+      [
+        req.user.id,
+        'CREATE',
+        'solicitudes',
+        result.insertId,
+        JSON.stringify({ nombre, email, tipoCaso, origen, clienteId: clienteId || null, creadoPorAdmin: true }),
+      ],
+    );
+
+    // Fetch the created solicitud with joins
+    const [created] = await pool.query<SolicitudRow[]>(
+      `SELECT s.*, u.nombre as asignadoNombre, c.nombre as clienteNombre
+       FROM solicitudes s
+       LEFT JOIN users u ON s.asignadoAId = u.id
+       LEFT JOIN clientes c ON s.clienteId = c.id
+       WHERE s.id = ? LIMIT 1`,
+      [result.insertId],
+    );
+
+    res.status(201).json({
+      success: true,
+      data: created[0],
+    });
+  } catch (error) {
+    console.error('[solicitudes.createAdmin] Error:', error);
     res.status(500).json({
       success: false,
       message: 'Error interno del servidor.',

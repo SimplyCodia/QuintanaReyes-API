@@ -243,6 +243,55 @@ export async function sendStatusChangeNotification(data: StatusChangeData): Prom
   ]);
 }
 
+// ─── 4. Comment notification → Internal users ───────────────────
+interface CommentNotificationData {
+  recipientEmail: string;
+  recipientName: string;
+  authorName: string;
+  solicitudId: number;
+  solicitudNombre: string;
+  contenido: string;
+  isReply: boolean;
+}
+
+function commentNotificationHtml(d: CommentNotificationData): string {
+  const ref = padId(d.solicitudId);
+  const actionLabel = d.isReply ? 'respondió en' : 'comentó en';
+  const preview = d.contenido.length > 200 ? d.contenido.substring(0, 200) + '...' : d.contenido;
+  return emailWrapper(`
+    <p style="color:#C9A449;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:600;margin:0 0 16px;">Nuevo ${d.isReply ? 'Respuesta' : 'Comentario'}</p>
+    <h2 style="color:#0E0E0E;font-size:18px;margin:0 0 20px;">${esc(d.authorName)} ${actionLabel} solicitud ${esc(ref)}</h2>
+
+    <div style="background:#FAFAF7;padding:20px 24px;margin-bottom:20px;">
+      <table style="width:100%;border-collapse:collapse;">
+        <tr><td style="padding:5px 0;color:#6B6B6B;font-size:13px;width:130px;">Solicitud:</td><td style="padding:5px 0;font-size:14px;font-weight:700;color:#0E0E0E;">${esc(ref)} — ${esc(d.solicitudNombre)}</td></tr>
+        <tr><td style="padding:5px 0;color:#6B6B6B;font-size:13px;">Autor:</td><td style="padding:5px 0;font-size:13px;">${esc(d.authorName)}</td></tr>
+      </table>
+    </div>
+
+    <div style="border-left:3px solid #C9A449;padding:14px 20px;background:#FAFAF7;margin-bottom:20px;">
+      <p style="margin:0;font-size:14px;line-height:1.6;color:#1C1C1C;">${esc(preview)}</p>
+    </div>
+
+    <p style="color:#6B6B6B;font-size:13px;line-height:1.6;margin:0;">
+      Ingrese al panel de administración para ver el comentario completo y responder.
+    </p>
+    <p style="color:#6B6B6B;font-size:11px;margin:16px 0 0;">Generado el ${timestamp()}</p>
+  `);
+}
+
+export async function sendCommentNotification(data: CommentNotificationData): Promise<void> {
+  const ref = padId(data.solicitudId);
+  const actionLabel = data.isReply ? 'respondió en' : 'comentó en';
+
+  await transporter.sendMail({
+    from: FROM,
+    to: data.recipientEmail,
+    subject: `${data.authorName} ${actionLabel} solicitud ${ref} - Quintana Reyes & Asociados`,
+    html: commentNotificationHtml(data),
+  });
+}
+
 export async function verifySmtpConnection(): Promise<boolean> {
   try {
     await transporter.verify();
