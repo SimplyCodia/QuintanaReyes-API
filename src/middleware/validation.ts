@@ -114,6 +114,155 @@ export const createUserValidation = [
     .withMessage('Rol invalido. Debe ser ADMIN o ABOGADO.'),
 ];
 
+// ── Create Blog Post (admin) ──────────────────────────────────────
+export const createBlogPostValidation = [
+  body('titulo_es')
+    .trim()
+    .notEmpty()
+    .withMessage('El titulo en espanol es requerido.')
+    .isLength({ max: 300 })
+    .withMessage('El titulo en espanol no puede exceder 300 caracteres.'),
+  body('titulo_en')
+    .optional({ values: 'falsy' })
+    .trim()
+    .isLength({ max: 300 })
+    .withMessage('El titulo en ingles no puede exceder 300 caracteres.'),
+  body('extracto_es')
+    .optional({ values: 'falsy' })
+    .trim()
+    .isLength({ max: 500 })
+    .withMessage('El extracto en espanol no puede exceder 500 caracteres.'),
+  body('extracto_en')
+    .optional({ values: 'falsy' })
+    .trim()
+    .isLength({ max: 500 })
+    .withMessage('El extracto en ingles no puede exceder 500 caracteres.'),
+  body('contenido_es')
+    .trim()
+    .notEmpty()
+    .withMessage('El contenido en espanol es requerido.'),
+  body('contenido_en')
+    .optional({ values: 'falsy' })
+    .isString()
+    .withMessage('El contenido en ingles debe ser texto.'),
+  body('categoria_es')
+    .optional({ values: 'falsy' })
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage('La categoria en espanol no puede exceder 100 caracteres.'),
+  body('categoria_en')
+    .optional({ values: 'falsy' })
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage('La categoria en ingles no puede exceder 100 caracteres.'),
+  body('tags_es')
+    .optional({ values: 'falsy' })
+    .isArray({ max: 20 })
+    .withMessage('Los tags en espanol deben ser un arreglo (max 20).'),
+  body('tags_en')
+    .optional({ values: 'falsy' })
+    .isArray({ max: 20 })
+    .withMessage('Los tags en ingles deben ser un arreglo (max 20).'),
+  body('imagenDestacada')
+    .optional({ values: 'falsy' })
+    .isString()
+    .withMessage('La imagen destacada debe ser un string base64.'),
+  body('imagenDestacadaMime')
+    .optional({ values: 'falsy' })
+    .isIn(['image/jpeg', 'image/png', 'image/webp'])
+    .withMessage('Tipo MIME de imagen invalido.'),
+  body('autor')
+    .trim()
+    .notEmpty()
+    .withMessage('El autor es requerido.')
+    .isLength({ max: 200 })
+    .withMessage('El autor no puede exceder 200 caracteres.'),
+  body('estado')
+    .optional()
+    .isIn(['BORRADOR', 'PROGRAMADO', 'PUBLICADO', 'ARCHIVADO'])
+    .withMessage('Estado de blog invalido.'),
+  body('fechaPublicacion')
+    .optional({ values: 'falsy' })
+    .isISO8601()
+    .withMessage('Fecha de publicacion invalida (ISO 8601).'),
+];
+
+// ── Update Blog Post (admin) ──────────────────────────────────────
+export const updateBlogPostValidation = [
+  body('titulo_es')
+    .optional()
+    .trim()
+    .notEmpty()
+    .withMessage('El titulo en espanol no puede estar vacio.')
+    .isLength({ max: 300 })
+    .withMessage('El titulo en espanol no puede exceder 300 caracteres.'),
+  body('titulo_en')
+    .optional({ values: 'null' })
+    .trim()
+    .isLength({ max: 300 })
+    .withMessage('El titulo en ingles no puede exceder 300 caracteres.'),
+  body('extracto_es')
+    .optional({ values: 'null' })
+    .trim()
+    .isLength({ max: 500 })
+    .withMessage('El extracto en espanol no puede exceder 500 caracteres.'),
+  body('extracto_en')
+    .optional({ values: 'null' })
+    .trim()
+    .isLength({ max: 500 })
+    .withMessage('El extracto en ingles no puede exceder 500 caracteres.'),
+  body('contenido_es')
+    .optional()
+    .trim()
+    .notEmpty()
+    .withMessage('El contenido en espanol no puede estar vacio.'),
+  body('contenido_en')
+    .optional({ values: 'null' })
+    .isString()
+    .withMessage('El contenido en ingles debe ser texto.'),
+  body('categoria_es')
+    .optional({ values: 'null' })
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage('La categoria en espanol no puede exceder 100 caracteres.'),
+  body('categoria_en')
+    .optional({ values: 'null' })
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage('La categoria en ingles no puede exceder 100 caracteres.'),
+  body('tags_es')
+    .optional({ values: 'null' })
+    .isArray({ max: 20 })
+    .withMessage('Los tags en espanol deben ser un arreglo (max 20).'),
+  body('tags_en')
+    .optional({ values: 'null' })
+    .isArray({ max: 20 })
+    .withMessage('Los tags en ingles deben ser un arreglo (max 20).'),
+  body('imagenDestacada')
+    .optional({ values: 'null' })
+    .isString()
+    .withMessage('La imagen destacada debe ser un string base64.'),
+  body('imagenDestacadaMime')
+    .optional({ values: 'null' })
+    .isIn(['image/jpeg', 'image/png', 'image/webp'])
+    .withMessage('Tipo MIME de imagen invalido.'),
+  body('autor')
+    .optional()
+    .trim()
+    .notEmpty()
+    .withMessage('El autor no puede estar vacio.')
+    .isLength({ max: 200 })
+    .withMessage('El autor no puede exceder 200 caracteres.'),
+  body('estado')
+    .optional()
+    .isIn(['BORRADOR', 'PROGRAMADO', 'PUBLICADO', 'ARCHIVADO'])
+    .withMessage('Estado de blog invalido.'),
+  body('fechaPublicacion')
+    .optional({ values: 'null' })
+    .isISO8601()
+    .withMessage('Fecha de publicacion invalida (ISO 8601).'),
+];
+
 // ── Update User (admin panel) ─────────────────────────────────────
 export const updateUserValidation = [
   body('nombre')

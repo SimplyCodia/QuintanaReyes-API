@@ -78,6 +78,33 @@ export interface AuditLogRow extends RowDataPacket {
   fecha: Date;
 }
 
+// ── Blog ──────────────────────────────────────────────────────────
+export type EstadoBlog = 'BORRADOR' | 'PROGRAMADO' | 'PUBLICADO' | 'ARCHIVADO';
+
+export interface BlogPostRow extends RowDataPacket {
+  id: number;
+  titulo_es: string;
+  titulo_en: string | null;
+  slug_es: string;
+  slug_en: string | null;
+  extracto_es: string | null;
+  extracto_en: string | null;
+  contenido_es: string;
+  contenido_en: string | null;
+  categoria_es: string | null;
+  categoria_en: string | null;
+  tags_es: string | string[] | null;
+  tags_en: string | string[] | null;
+  imagenDestacada: string | null;
+  imagenDestacadaMime: string | null;
+  autor: string;
+  estado: EstadoBlog;
+  fechaPublicacion: Date | null;
+  fechaCreacion: Date;
+  fechaActualizacion: Date;
+  creadoPorId: number | null;
+}
+
 // ── API Response ──────────────────────────────────────────────────
 export interface ApiResponse<T = unknown> {
   success: boolean;

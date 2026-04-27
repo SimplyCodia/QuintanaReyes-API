@@ -11,6 +11,7 @@ import solicitudesRoutes from './routes/solicitudes.routes';
 import usersRoutes from './routes/users.routes';
 import dashboardRoutes from './routes/dashboard.routes';
 import auditRoutes from './routes/audit.routes';
+import blogRoutes from './routes/blog.routes';
 
 const app = express();
 
@@ -39,8 +40,9 @@ app.use(
 app.use(morgan(config.nodeEnv === 'production' ? 'combined' : 'dev'));
 
 // ── Body parsing with size limit ──────────────────────────────────
-app.use(express.json({ limit: '1mb' }));
-app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+// Raised to 10mb to accommodate base64-encoded images for the blog module.
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // ── General rate limiter ──────────────────────────────────────────
 app.use(generalLimiter);
@@ -56,6 +58,7 @@ app.use('/api/solicitudes', solicitudesRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/audit', auditRoutes);
+app.use('/api/blog', blogRoutes);
 
 // ── 404 handler ───────────────────────────────────────────────────
 app.use((_req: Request, res: Response) => {

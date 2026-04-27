@@ -86,6 +86,40 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
+CREATE TABLE IF NOT EXISTS blog_posts (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  titulo_es VARCHAR(300) NOT NULL,
+  titulo_en VARCHAR(300) NULL,
+  slug_es VARCHAR(350) NOT NULL,
+  slug_en VARCHAR(350) NULL,
+  extracto_es TEXT NULL,
+  extracto_en TEXT NULL,
+  contenido_es LONGTEXT NOT NULL,
+  contenido_en LONGTEXT NULL,
+  categoria_es VARCHAR(100) NULL,
+  categoria_en VARCHAR(100) NULL,
+  tags_es JSON NULL,
+  tags_en JSON NULL,
+  imagenDestacada LONGTEXT NULL,
+  imagenDestacadaMime VARCHAR(50) NULL,
+  autor VARCHAR(200) NOT NULL,
+  estado ENUM('BORRADOR', 'PROGRAMADO', 'PUBLICADO', 'ARCHIVADO') NOT NULL DEFAULT 'BORRADOR',
+  fechaPublicacion DATETIME NULL,
+  fechaCreacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  fechaActualizacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  creadoPorId INT NULL,
+
+  UNIQUE KEY idx_blog_slug_es (slug_es),
+  UNIQUE KEY idx_blog_slug_en (slug_en),
+  INDEX idx_blog_estado (estado),
+  INDEX idx_blog_fechaPublicacion (fechaPublicacion),
+
+  CONSTRAINT fk_blog_creadoPor
+    FOREIGN KEY (creadoPorId) REFERENCES users(id)
+    ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
 -- ============================================================
 -- Initial admin user  (password: admin123)
 -- ============================================================
