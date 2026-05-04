@@ -1,13 +1,19 @@
 import rateLimit from 'express-rate-limit';
+import type { Request } from 'express';
 
 /**
- * General rate limiter: 100 requests per 15 minutes per IP.
+ * General rate limiter: 1000 requests per 15 minutes per IP.
+ * Skips rate limiting for authenticated requests (protected by JWT).
  */
 export const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 1000,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req: Request) => {
+    const authHeader = req.headers.authorization;
+    return !!authHeader && authHeader.startsWith('Bearer ');
+  },
   message: {
     success: false,
     message: 'Demasiadas solicitudes. Intente nuevamente en 15 minutos.',
@@ -15,11 +21,11 @@ export const generalLimiter = rateLimit({
 });
 
 /**
- * Auth rate limiter: 5 login attempts per 15 minutes per IP.
+ * Auth rate limiter: 15 login attempts per 15 minutes per IP.
  */
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 5,
+  max: 15,
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -30,11 +36,11 @@ export const authLimiter = rateLimit({
 });
 
 /**
- * Contact form rate limiter: 3 submissions per hour per IP.
+ * Contact form rate limiter: 10 submissions per hour per IP.
  */
 export const contactFormLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
-  max: 3,
+  max: 10,
   standardHeaders: true,
   legacyHeaders: false,
   message: {

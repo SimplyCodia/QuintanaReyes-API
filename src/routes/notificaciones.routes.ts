@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   getNotificaciones,
+  getUnreadCount,
   marcarLeida,
   marcarTodasLeidas,
 } from '../controllers/notificaciones.controller';
@@ -10,6 +11,9 @@ const router = Router();
 
 // GET /api/notificaciones — Protected
 router.get('/', authenticate, getNotificaciones);
+
+// GET /api/notificaciones/unread-count — Protected (lightweight count-only)
+router.get('/unread-count', authenticate, getUnreadCount);
 
 // PUT /api/notificaciones/leer-todas — Protected (must be before /:id routes)
 router.put('/leer-todas', authenticate, marcarTodasLeidas);

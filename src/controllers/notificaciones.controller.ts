@@ -63,6 +63,35 @@ export async function getNotificaciones(
 }
 
 /**
+ * GET /api/notificaciones/unread-count
+ * Protected. Returns only the unread notification count (lightweight).
+ */
+export async function getUnreadCount(
+  req: AuthRequest,
+  res: Response,
+): Promise<void> {
+  if (!req.user) {
+    res.status(401).json({ success: false, message: 'No autenticado.' });
+    return;
+  }
+
+  try {
+    const [countResult] = await pool.query<NotificacionRow[]>(
+      'SELECT COUNT(*) as total FROM notificaciones WHERE usuarioId = ? AND leida = 0',
+      [req.user.id],
+    );
+    const total = (countResult[0] as unknown as { total: number }).total;
+    res.json({ success: true, totalNoLeidas: total });
+  } catch (error) {
+    console.error('[notificaciones.getUnreadCount] Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor.',
+    });
+  }
+}
+
+/**
  * PUT /api/notificaciones/:id/leer
  * Protected. Mark a single notification as read.
  */
