@@ -110,8 +110,8 @@ export const createUserValidation = [
     .isLength({ max: 128 })
     .withMessage('La contrasena no puede exceder 128 caracteres.'),
   body('rol')
-    .isIn(['ADMIN', 'ABOGADO'])
-    .withMessage('Rol invalido. Debe ser ADMIN o ABOGADO.'),
+    .isIn(['ADMIN', 'ABOGADO', 'ASISTENTE', 'LIMITED'])
+    .withMessage('Rol invalido.'),
 ];
 
 // ── Create Blog Post (admin) ──────────────────────────────────────
@@ -425,8 +425,8 @@ export const updateUserValidation = [
     .withMessage('La contrasena no puede exceder 128 caracteres.'),
   body('rol')
     .optional()
-    .isIn(['ADMIN', 'ABOGADO'])
-    .withMessage('Rol invalido. Debe ser ADMIN o ABOGADO.'),
+    .isIn(['ADMIN', 'ABOGADO', 'ASISTENTE', 'LIMITED'])
+    .withMessage('Rol invalido.'),
   body('activo')
     .optional()
     .isBoolean()

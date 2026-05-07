@@ -11,7 +11,11 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const FIRM_GMAIL = 'Quintanareyes.abogados@gmail.com';
+const NOTIFICATION_RECIPIENTS = [
+  'lloyd.q@quintanareyesabogados.com',
+  's.arroyo@quintanareyesabogados.com',
+  'info@quintanareyesabogados.com',
+].join(', ');
 const FROM = `"${config.smtp.fromName}" <${config.smtp.from}>`;
 
 const TIPO_CASO_LABELS: Record<string, string> = {
@@ -57,7 +61,7 @@ function emailWrapper(content: string, footerExtra = ''): string {
   <div style="padding:16px 32px;background:#0E0E0E;text-align:center;">
     <p style="color:#6B6B6B;font-size:11px;margin:0 0 4px;">Obarrio, Ciudad de Panamá · PH Atrium Tower, Piso 26</p>
     <p style="color:#6B6B6B;font-size:11px;margin:0 0 4px;">+507 6281-0554 | +507 6606-9100 | 309-0166 EXT 323</p>
-    <p style="color:#6B6B6B;font-size:11px;margin:0 0 4px;">info@quintanareyes.com · quintanareyes.com</p>
+    <p style="color:#6B6B6B;font-size:11px;margin:0 0 4px;">info@quintanareyesabogados.com · quintanareyesabogados.com</p>
     ${footerExtra}
     <p style="color:#4A4A4A;font-size:10px;margin:8px 0 0;">© ${new Date().getFullYear()} Quintana Reyes &amp; Asociados. Todos los derechos reservados.</p>
   </div>
@@ -209,7 +213,7 @@ export async function sendNewSolicitudNotification(data: NewSolicitudData): Prom
   await Promise.allSettled([
     transporter.sendMail({
       from: FROM,
-      to: `${config.smtp.from}, ${FIRM_GMAIL}`,
+      to: NOTIFICATION_RECIPIENTS,
       replyTo: data.email,
       subject: `Nueva solicitud web ${ref} - ${data.nombre} - ${area}`,
       html: firmNotificationHtml(data),
@@ -230,7 +234,7 @@ export async function sendStatusChangeNotification(data: StatusChangeData): Prom
   await Promise.allSettled([
     transporter.sendMail({
       from: FROM,
-      to: `${config.smtp.from}, ${FIRM_GMAIL}`,
+      to: NOTIFICATION_RECIPIENTS,
       subject: `Solicitud ${ref} → ${next} - ${data.nombre}`,
       html: statusChangeFirmHtml(data),
     }),

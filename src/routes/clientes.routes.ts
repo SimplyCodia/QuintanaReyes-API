@@ -6,7 +6,7 @@ import {
   updateCliente,
   deleteCliente,
 } from '../controllers/clientes.controller';
-import { authenticate, authorizeAdmin } from '../middleware/auth';
+import { authenticate, authorizeAdmin, denyLimited } from '../middleware/auth';
 import {
   createClienteValidation,
   updateClienteValidation,
@@ -14,17 +14,17 @@ import {
 
 const router = Router();
 
-// GET /api/clientes — Protected
-router.get('/', authenticate, getClientes);
+// GET /api/clientes — Protected (no LIMITED)
+router.get('/', authenticate, denyLimited, getClientes);
 
-// GET /api/clientes/:id — Protected
-router.get('/:id', authenticate, getClienteById);
+// GET /api/clientes/:id — Protected (no LIMITED)
+router.get('/:id', authenticate, denyLimited, getClienteById);
 
-// POST /api/clientes — Protected
-router.post('/', authenticate, createClienteValidation, createCliente);
+// POST /api/clientes — Protected (no LIMITED)
+router.post('/', authenticate, denyLimited, createClienteValidation, createCliente);
 
-// PUT /api/clientes/:id — Protected
-router.put('/:id', authenticate, updateClienteValidation, updateCliente);
+// PUT /api/clientes/:id — Protected (no LIMITED)
+router.put('/:id', authenticate, denyLimited, updateClienteValidation, updateCliente);
 
 // DELETE /api/clientes/:id — Protected, admin only
 router.delete('/:id', authenticate, authorizeAdmin, deleteCliente);

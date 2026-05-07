@@ -2,7 +2,7 @@ import { Request } from 'express';
 import { RowDataPacket } from 'mysql2';
 
 // ── User ──────────────────────────────────────────────────────────
-export type UserRole = 'ADMIN' | 'ABOGADO';
+export type UserRole = 'ADMIN' | 'ABOGADO' | 'ASISTENTE' | 'LIMITED';
 
 export interface UserRow extends RowDataPacket {
   id: number;

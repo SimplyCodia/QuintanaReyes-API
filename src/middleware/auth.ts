@@ -63,3 +63,22 @@ export function authorizeAdmin(
 
   next();
 }
+
+/**
+ * Deny access to users with LIMITED role.
+ * Must be used AFTER `authenticate`.
+ */
+export function denyLimited(
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+): void {
+  if (req.user?.rol === 'LIMITED') {
+    res.status(403).json({
+      success: false,
+      message: 'Acceso restringido.',
+    });
+    return;
+  }
+  next();
+}

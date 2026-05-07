@@ -68,6 +68,12 @@ export async function getSolicitudes(
       }
     }
 
+    // LIMITED users can only see solicitudes assigned to them
+    if (req.user?.rol === 'LIMITED') {
+      conditions.push('s.asignadoAId = ?');
+      params.push(req.user.id);
+    }
+
     // Search by nombre, email, or telefono
     if (req.query.search) {
       const search = `%${req.query.search}%`;
@@ -146,6 +152,15 @@ export async function getSolicitudById(
       res.status(404).json({
         success: false,
         message: 'Solicitud no encontrada.',
+      });
+      return;
+    }
+
+    // LIMITED users can only view solicitudes assigned to them
+    if (req.user?.rol === 'LIMITED' && rows[0].asignadoAId !== req.user.id) {
+      res.status(403).json({
+        success: false,
+        message: 'Acceso restringido.',
       });
       return;
     }

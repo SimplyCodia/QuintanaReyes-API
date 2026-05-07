@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
   nombre VARCHAR(150) NOT NULL,
   email VARCHAR(255) NOT NULL UNIQUE,
   passwordHash VARCHAR(255) NOT NULL,
-  rol ENUM('ADMIN', 'ABOGADO') NOT NULL DEFAULT 'ABOGADO',
+  rol ENUM('ADMIN', 'ABOGADO', 'ASISTENTE', 'LIMITED') NOT NULL DEFAULT 'ABOGADO',
   activo TINYINT(1) NOT NULL DEFAULT 1,
   ultimoAcceso DATETIME NULL,
   fechaCreacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -188,14 +188,12 @@ CREATE TABLE IF NOT EXISTS notificaciones (
 
 
 -- ============================================================
--- Initial admin user  (password: admin123)
+-- Initial users
 -- ============================================================
-INSERT INTO users (nombre, email, passwordHash, rol, activo)
-VALUES (
-  'Administrador',
-  'admin@quintanareyes.com',
-  '$2b$10$oZzaML6p9S4oiHQCCpqqfuGtT1nkjQFcwzOfLG7QECEtb2yi/NVNi',
-  'ADMIN',
-  1
-)
-ON DUPLICATE KEY UPDATE nombre = VALUES(nombre);
+INSERT INTO users (nombre, email, passwordHash, rol, activo) VALUES
+  ('Lloyd Quintana', 'lloyd.q@quintanareyesabogados.com', '$2b$10$FkemfbxhXWU3SQ7/rUhI..CPDDoT8PgeZSFJCDZx9aTrr4ek7iGyC', 'ADMIN', 1),
+  ('S. Arroyo', 's.arroyo@quintanareyesabogados.com', '$2b$10$mGeADUWuWca82K752pdqS.1.WDI.FLq5GOrpbg7hqPjj4G151hwK2', 'ADMIN', 1),
+  ('Info', 'info@quintanareyesabogados.com', '$2b$10$gTki8TroupWyr0DNDn7eb.s7.0TBqdDRukZHSaDvX20vfYz6EPDkO', 'ASISTENTE', 1),
+  ('V. Caicedo', 'v.caicedo@quintanareyesabogados.com', '$2b$10$sPQfXPwH.z7WEycPFrxliOeEHNQGRpCslO0N.2qMNPpTXyb/99asW', 'LIMITED', 1),
+  ('M. Barsallo', 'm.barsallo@quintanareyesabogados.com', '$2b$10$BBST8twQprfFV8t2l4fBROhYICcB0rXSPA0ZFeelveCqxSFWTKB32', 'LIMITED', 1)
+ON DUPLICATE KEY UPDATE passwordHash = VALUES(passwordHash), rol = VALUES(rol), activo = VALUES(activo);

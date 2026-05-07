@@ -12,6 +12,12 @@ export async function getStats(
   res: Response,
 ): Promise<void> {
   try {
+    // LIMITED users only see stats for their assigned solicitudes
+    const isLimited = req.user?.rol === 'LIMITED';
+    const filter = isLimited ? ' AND asignadoAId = ?' : '';
+    const filterFirst = isLimited ? ' WHERE asignadoAId = ?' : '';
+    const filterParams = isLimited ? [req.user!.id] : [];
+
     // Run all stat queries in parallel
     const [
       [totalResult],
@@ -23,25 +29,32 @@ export async function getStats(
       [semanaResult],
     ] = await Promise.all([
       pool.query<RowDataPacket[]>(
-        'SELECT COUNT(*) as total FROM solicitudes',
+        `SELECT COUNT(*) as total FROM solicitudes${filterFirst}`,
+        filterParams,
       ),
       pool.query<RowDataPacket[]>(
-        "SELECT COUNT(*) as total FROM solicitudes WHERE estado = 'PENDIENTE'",
+        `SELECT COUNT(*) as total FROM solicitudes WHERE estado = 'PENDIENTE'${filter}`,
+        filterParams,
       ),
       pool.query<RowDataPacket[]>(
-        "SELECT COUNT(*) as total FROM solicitudes WHERE estado = 'EN_PROCESO'",
+        `SELECT COUNT(*) as total FROM solicitudes WHERE estado = 'EN_PROCESO'${filter}`,
+        filterParams,
       ),
       pool.query<RowDataPacket[]>(
-        "SELECT COUNT(*) as total FROM solicitudes WHERE estado = 'ATENDIDA'",
+        `SELECT COUNT(*) as total FROM solicitudes WHERE estado = 'ATENDIDA'${filter}`,
+        filterParams,
       ),
       pool.query<RowDataPacket[]>(
-        "SELECT COUNT(*) as total FROM solicitudes WHERE estado = 'ARCHIVADA'",
+        `SELECT COUNT(*) as total FROM solicitudes WHERE estado = 'ARCHIVADA'${filter}`,
+        filterParams,
       ),
       pool.query<RowDataPacket[]>(
-        'SELECT COUNT(*) as total FROM solicitudes WHERE DATE(fechaCreacion) = CURDATE()',
+        `SELECT COUNT(*) as total FROM solicitudes WHERE DATE(fechaCreacion) = CURDATE()${filter}`,
+        filterParams,
       ),
       pool.query<RowDataPacket[]>(
-        'SELECT COUNT(*) as total FROM solicitudes WHERE fechaCreacion >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)',
+        `SELECT COUNT(*) as total FROM solicitudes WHERE fechaCreacion >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)${filter}`,
+        filterParams,
       ),
     ]);
 
@@ -80,13 +93,18 @@ export async function getSolicitudesPorDia(
       Math.max(7, parseInt(req.query.dias as string) || 30),
     );
 
+    const isLimited = req.user?.rol === 'LIMITED';
+    const filter = isLimited ? ' AND asignadoAId = ?' : '';
+    const params: unknown[] = [dias];
+    if (isLimited) params.push(req.user!.id);
+
     const [rows] = await pool.query<RowDataPacket[]>(
       `SELECT DATE(fechaCreacion) as fecha, COUNT(*) as total
        FROM solicitudes
-       WHERE fechaCreacion >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
+       WHERE fechaCreacion >= DATE_SUB(CURDATE(), INTERVAL ? DAY)${filter}
        GROUP BY DATE(fechaCreacion)
        ORDER BY fecha ASC`,
-      [dias],
+      params,
     );
 
     res.json({
@@ -111,11 +129,16 @@ export async function getDistribucionPorArea(
   res: Response,
 ): Promise<void> {
   try {
+    const isLimited = req.user?.rol === 'LIMITED';
+    const filterFirst = isLimited ? ' WHERE asignadoAId = ?' : '';
+    const filterParams = isLimited ? [req.user!.id] : [];
+
     const [rows] = await pool.query<RowDataPacket[]>(
       `SELECT tipoCaso, COUNT(*) as total
-       FROM solicitudes
+       FROM solicitudes${filterFirst}
        GROUP BY tipoCaso
        ORDER BY total DESC`,
+      filterParams,
     );
 
     res.json({
